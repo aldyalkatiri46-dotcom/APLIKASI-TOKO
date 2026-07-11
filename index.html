@@ -143,6 +143,10 @@
                         <label>Stok Awal</label>
                         <input type="number" id="stokBarang" min="0" required placeholder="0">
                     </div>
+                    <div class="form-group">
+                        <label>Harga Beli / Modal Unit (@)</label>
+                        <input type="number" id="hargaBeliBarang" min="0" required placeholder="0">
+                    </div>
                     <button type="submit" class="btn-primary">Simpan Barang</button>
                 </form>
             </div>
@@ -153,17 +157,17 @@
                     <div class="form-group">
                         <label>Jenis Transaksi</label>
                         <select id="jenisTransaksi" onchange="sesuaikanLabelHarga()">
-                            <option value="Masuk">Barang Masuk (Beli Persediaan Stok)</option>
                             <option value="Keluar">Barang Terjual (Penjualan)</option>
+                            <option value="Masuk">Barang Masuk (Beli Persediaan Stok)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Pilih Barang</label>
-                        <select id="pilihBarang" required></select>
+                        <select id="pilihBarang" required onchange="autoIsiHarga()"></select>
                     </div>
                     <div class="form-group">
-                        <label id="labelHarga">Harga Beli Per Unit (Harga Modal Persediaan)</label>
-                        <input type="number" id="hargaTransaksi" min="1" required placeholder="0">
+                        <label id="labelHarga">Harga Jual Per Unit (Harga ke Konsumen)</label>
+                        <input type="number" id="hargaTransaksi" min="0" required placeholder="0">
                     </div>
                     <div class="form-group">
                         <label>Jumlah (Qty)</label>
@@ -194,6 +198,7 @@
                     <thead>
                         <tr>
                             <th>Nama Barang</th>
+                            <th>Harga Modal</th>
                             <th>Sisa Stok</th>
                             <th>Aksi</th>
                         </tr>
@@ -247,9 +252,30 @@
         const jenis = document.getElementById('jenisTransaksi').value;
         const label = document.getElementById('labelHarga');
         if (jenis === 'Masuk') {
-            label.innerText = "Harga Beli Per Unit (Harga Modal Persediaan)";
+            label.innerText = "Harga Beli Per Unit (Harga Modal Persediaan Baru)";
         } else {
             label.innerText = "Harga Jual Per Unit (Harga ke Konsumen)";
+        }
+        autoIsiHarga();
+    }
+
+    function autoIsiHarga() {
+        const indexBarang = document.getElementById('pilihBarang').value;
+        const jenis = document.getElementById('jenisTransaksi').value;
+        const inputHarga = document.getElementById('hargaTransaksi');
+        
+        if (indexBarang === "") {
+            inputHarga.value = "";
+            return;
+        }
+
+        const barang = dbBarang[indexBarang];
+        if (jenis === 'Masuk') {
+            // Kalau beli barang, otomatis sarankan harga modal yang sudah tercatat
+            inputHarga.value = barang.hargaBeli || 0;
+        } else {
+            // Kalau jual barang, default dikosongkan agar diisi manual / beri perkiraan margin
+            inputHarga.value = ""; 
         }
     }
 
@@ -274,9 +300,11 @@
         const tBodyBarang = document.getElementById('tabelBarangBody');
         tBodyBarang.innerHTML = '';
         dbBarang.forEach((barang, index) => {
+            const hgBeli = barang.hargaBeli || 0;
             tBodyBarang.innerHTML += `
                 <tr>
                     <td><b>${barang.nama}</b></td>
+                    <td>Rp ${hgBeli.toLocaleString('id-ID')}</td>
                     <td>${barang.stok} Unit</td>
                     <td><button onclick="hapusBarang(${index})" class="btn-danger" style="padding:2px 6px; font-size:11px;">Hapus</button></td>
                 </tr>
@@ -312,6 +340,7 @@
         e.preventDefault();
         const nama = document.getElementById('namaBarang').value.trim();
         const stok = parseInt(document.getElementById('stokBarang').value);
+        const hargaBeli = parseInt(document.getElementById('hargaBeliBarang').value) || 0;
 
         const adaBarang = dbBarang.find(b => b.nama.toLowerCase() === nama.toLowerCase());
         if (adaBarang) {
@@ -319,7 +348,7 @@
             return;
         }
 
-        dbBarang.push({ nama, stok });
+        dbBarang.push({ nama, stok, hargaBeli });
         document.getElementById('barangForm').reset();
         renderAplikasi();
     });
@@ -344,6 +373,8 @@
 
         if (jenis === 'Masuk') {
             barang.stok += qty;
+            // Opsional: memperbarui harga modal di master jika pas restock harganya berubah
+            barang.hargaBeli = harga; 
         } else {
             barang.stok -= qty;
         }
@@ -353,7 +384,8 @@
             tipe: jenis,
             namaBarang: barang.nama,
             qty: qty,
-            harga: harga
+            harga: harga,
+            hargaBeliAsli: barang.hargaBeli // Menyimpan snapshot harga modal saat transaksi terjadi
         });
 
         document.getElementById('qtyTransaksi').value = '';
@@ -376,12 +408,13 @@
         }
     }
 
-    // Kalkulasi finansial bulanan & pembuatan chart diagram
+    // Kalkulasi finansial bulanan & pembuatan chart diagram (HPP Akurat)
     function prosesLabaRugiDanGrafik() {
         const blnIni = new Date().toISOString().slice(0, 7); 
         
         let totalBeliBlnIni = 0;
         let totalJualBlnIni = 0;
+        let totalHppBlnIni = 0;
         let bulananData = {};
 
         dbTransaksi.forEach(tx => {
@@ -389,36 +422,47 @@
             const bulanTx = tx.tanggal.slice(0, 7);
 
             if (bulanTx === blnIni) {
-                if (tx.tipe === 'Masuk') totalBeliBlnIni += total;
-                if (tx.tipe === 'Keluar') totalJualBlnIni += total;
+                if (tx.tipe === 'Masuk') {
+                    totalBeliBlnIni += total;
+                }
+                if (tx.tipe === 'Keluar') {
+                    totalJualBlnIni += total;
+                    // HPP = Qty Terjual * Harga Modal
+                    totalHppBlnIni += (tx.qty * (tx.hargaBeliAsli || 0));
+                }
             }
 
             if (!bulananData[bulanTx]) {
-                bulananData[bulanTx] = { masuk: 0, keluar: 0 };
+                bulananData[bulanTx] = { masuk: 0, keluar: 0, hpp: 0 };
             }
             if (tx.tipe === 'Masuk') bulananData[bulanTx].masuk += total;
-            if (tx.tipe === 'Keluar') bulananData[bulanTx].keluar += total;
+            if (tx.tipe === 'Keluar') {
+                bulananData[bulanTx].keluar += total;
+                bulananData[bulanTx].hpp += (tx.qty * (tx.hargaBeliAsli || 0));
+            }
         });
 
         document.getElementById('statBeli').innerText = `Rp ${totalBeliBlnIni.toLocaleString('id-ID')}`;
         document.getElementById('statJual').innerText = `Rp ${totalJualBlnIni.toLocaleString('id-ID')}`;
         
-        const selisihBlnIni = totalJualBlnIni - totalBeliBlnIni;
+        // LABA BERSIH = Total Penjualan - Total HPP Barang yang Terjual
+        const keuntunganBersihBlnIni = totalJualBlnIni - totalHppBlnIni;
         const statLabaRugi = document.getElementById('statLabaRugi');
         const boxLabaRugi = document.getElementById('boxLabaRugi');
 
-        if(selisihBlnIni >= 0) {
-            statLabaRugi.innerText = `Untung Bersih: Rp ${selisihBlnIni.toLocaleString('id-ID')}`;
+        if(keuntunganBersihBlnIni >= 0) {
+            statLabaRugi.innerText = `Untung Bersih: Rp ${keuntunganBersihBlnIni.toLocaleString('id-ID')}`;
             boxLabaRugi.className = "stat-box bg-laba";
         } else {
-            statLabaRugi.innerText = `Rugi Operasional: Rp ${Math.abs(selisihBlnIni).toLocaleString('id-ID')}`;
+            statLabaRugi.innerText = `Rugi Bersih: Rp ${Math.abs(keuntunganBersihBlnIni).toLocaleString('id-ID')}`;
             boxLabaRugi.className = "stat-box bg-danger";
         }
 
         const sortedLabels = Object.keys(bulananData).sort().slice(-6);
         const dataSetMasuk = sortedLabels.map(bln => bulananData[bln].masuk);
         const dataSetKeluar = sortedLabels.map(bln => bulananData[bln].keluar);
-        const dataSetLabaRugi = sortedLabels.map(bln => bulananData[bln].keluar - bulananData[bln].masuk);
+        // Garis grafik Laba/Rugi menggambarkan Penjualan dikurangi HPP (Laba Bersih Riil)
+        const dataSetLabaRugi = sortedLabels.map(bln => bulananData[bln].keluar - bulananData[bln].hpp);
 
         if (myChart) { myChart.destroy(); }
 
@@ -439,7 +483,7 @@
                         backgroundColor: '#e67e22',
                     },
                     {
-                        label: 'Laba / Rugi Bersih',
+                        label: 'Laba Bersih Riil',
                         data: dataSetLabaRugi,
                         type: 'line',
                         borderColor: '#2ecc71',
