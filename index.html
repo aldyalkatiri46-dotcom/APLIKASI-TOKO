@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Manajemen Toko & Laba Rugi - Versi Ritel Modern</title>
+    <title>Sistem Ritel Modern - Fitur Konversi Satuan & Laba Rugi</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #1e293b;       /* Dark Slate */
-            --secondary: #10b981;     /* Emerald Green */
+            --secondary: #2563eb;     /* Blue Alfamart/Indomaret Style */
             --danger: #ef4444;        /* Rose Red */
-            --warning: #f59e0b;       /* Amber */
-            --background: #f1f5f9;    /* Light Slate */
+            --success: #10b981;       /* Emerald Green */
+            --background: #f8fafc;    /* Light Gray */
             --card-bg: #ffffff;
             --text-main: #334155;
             --text-muted: #64748b;
@@ -25,36 +25,18 @@
             color: var(--text-main);
         }
 
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-        }
-
-        h1 { 
-            text-align: center; 
-            color: var(--primary); 
-            font-size: 26px;
-            letter-spacing: -0.5px;
-            margin-bottom: 5px;
-        }
-        
-        hr {
-            border: 0;
-            height: 1px;
-            background: #e2e8f0;
-            margin: 25px 0;
-        }
+        .container { max-width: 1300px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary); font-size: 26px; margin-bottom: 5px; }
+        hr { border: 0; height: 1px; background: #e2e8f0; margin: 25px 0; }
 
         .grid-layout {
             display: grid;
-            grid-template-columns: 1fr 1.8fr;
+            grid-template-columns: 1fr 1.5fr;
             gap: 24px;
             margin-bottom: 24px;
         }
 
-        @media (max-width: 900px) {
-            .grid-layout { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 950px) { .grid-layout { grid-template-columns: 1fr; } }
 
         .card {
             background: var(--card-bg);
@@ -62,268 +44,173 @@
             border-radius: 12px;
             border: 1px solid #e2e8f0;
             box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
-            transition: transform 0.2s, box-shadow 0.2s;
         }
+
+        .card h3 { margin-top: 0; margin-bottom: 18px; font-size: 16px; color: var(--primary); }
+
+        form { display: flex; flex-direction: column; gap: 14px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        .card:hover {
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
-        }
+        label { font-weight: 600; font-size: 12px; color: var(--text-muted); text-transform: uppercase; }
+        input, select { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #f8fafc; }
+        input:focus, select:focus { outline: none; border-color: var(--secondary); background-color: #fff; }
 
-        .card h3 {
-            margin-top: 0;
-            margin-bottom: 18px;
-            font-size: 16px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        label { 
-            font-weight: 600; 
-            font-size: 12px; 
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        input, select { 
-            padding: 10px 14px; 
-            border: 1px solid #cbd5e1; 
-            border-radius: 8px; 
-            font-size: 14px; 
-            color: var(--text-main);
-            background-color: #f8fafc;
-            transition: all 0.2s;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #6366f1;
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        button { 
-            padding: 11px 16px; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: 600; 
-            font-size: 13px;
-            cursor: pointer; 
-            transition: all 0.2s;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-        }
+        button { padding: 11px 16px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center;}
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: #0f172a; }
-        
         .btn-secondary { background: var(--secondary); color: white; }
-        .btn-secondary:hover { background: #059669; }
-        
-        .btn-danger { background: #fee2e2; color: var(--danger); font-weight: 600; }
+        .btn-danger { background: #fee2e2; color: var(--danger); }
         .btn-danger:hover { background: var(--danger); color: white; }
 
-        .dashboard-stat {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-        }
-
-        .stat-box {
-            padding: 20px;
-            border-radius: 10px;
-            color: white;
-            font-weight: normal;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
-        }
+        .dashboard-stat { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+        .stat-box { padding: 20px; border-radius: 10px; color: white; }
+        .stat-box span { display: block; font-size: 22px; font-weight: 700; margin-top: 8px; }
         
-        .stat-box span {
-            display: block;
-            font-size: 22px;
-            font-weight: 700;
-            margin-top: 8px;
-            letter-spacing: -0.5px;
-        }
-        
-        .bg-masuk { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-        .bg-keluar { background: linear-gradient(135deg, #f97316, #c2410c); }
+        .bg-beli { background: linear-gradient(135deg, #475569, #1e293b); }
+        .bg-omset { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
         .bg-laba { background: linear-gradient(135deg, #10b981, #047857); }
 
-        .table-responsive { 
-            overflow-x: auto; 
-            margin-top: 5px; 
-            max-height: 320px; 
-            overflow-y: auto; 
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-        }
-        
-        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-        th, td { padding: 12px 14px; border-bottom: 1px solid #e2e8f0; }
-        
-        th { 
-            background: #f8fafc; 
-            color: var(--text-muted); 
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 0.5px;
-            position: sticky; 
-            top: 0; 
-            z-index: 10;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
+        .table-responsive { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 350px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 12px 14px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        th { background: #f8fafc; color: var(--text-muted); position: sticky; top: 0; z-index: 10; border-bottom: 2px solid #e2e8f0; }
         tr:hover { background-color: #f8fafc; }
 
-        .tabs { 
-            display: flex; 
-            gap: 6px; 
-            background: #e2e8f0; 
-            padding: 4px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-        }
-        .tab-btn { 
-            flex: 1; 
-            background: transparent; 
-            color: var(--text-muted); 
-            padding: 8px; 
-            font-size: 13px; 
-            border-radius: 6px;
-        }
-        .tab-btn:hover { color: var(--primary); }
-        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        
+        .tabs { display: flex; gap: 6px; background: #e2e8f0; padding: 4px; border-radius: 8px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; background: transparent; color: var(--text-muted); padding: 8px; border-radius: 6px; }
+        .tab-btn.active { background: white; color: var(--primary); font-weight: bold; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #e2e8f0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏪 SISTEM MANAJEMEN TOKO RITEL</h1>
-    <p style="text-align: center; color: var(--text-muted); margin-top: 0px; font-size: 14px;">Pencatatan Stok Multi-Satuan, Transaksi Masuk/Keluar, dan Laporan Finansial</p>
+    <h1>🏪 TOKO MAJU KENA MUNDUR KENA</h1>
+    <p style="text-align: center; color: var(--text-muted); margin-top: 0px; font-size: 14px;">Sistem Kasir Modern: Konversi Otomatis Satuan Grosir ke Eceran & Laba Rugi Akurat</p>
     <hr>
 
     <div class="card" style="margin-bottom: 24px;">
-        <h3>📊 Ringkasan Finansial (Bulan Ini)</h3>
+        <h3>📊 Laporan Keuangan (Bulan Ini)</h3>
         <div class="dashboard-stat">
-            <div class="stat-box bg-masuk">Total Pembelian Stok<span><small id="statBeli">Rp 0</small></span></div>
-            <div class="stat-box bg-keluar">Total Omset Penjualan<span><small id="statJual">Rp 0</small></span></div>
-            <div id="boxLabaRugi" class="stat-box">Status Laba/Rugi Bersih<span><small id="statLabaRugi">Rp 0</small></span></div>
+            <div class="stat-box bg-beli">Total Pembelian (Modal Kulakan)<span><small id="statBeli">Rp 0</small></span></div>
+            <div class="stat-box bg-omset">Total Penjualan (Omset Kotor)<span><small id="statJual">Rp 0</small></span></div>
+            <div id="boxLabaRugi" class="stat-box bg-laba">Keuntungan Bersih (Riil)<span><small id="statLabaRugi">Rp 0</small></span></div>
         </div>
     </div>
 
     <div class="grid-layout">
         <div class="card">
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('tabBarang', this)">📦 Master Barang</button>
-                <button class="tab-btn" onclick="switchTab('tabTransaksi', this)">💸 Transaksi Baru</button>
+                <button class="tab-btn active" onclick="switchTab('tabBarang', this)">📦 Pendaftaran Barang</button>
+                <button class="tab-btn" onclick="switchTab('tabTransaksi', this)">💸 Kasir Transaksi</button>
             </div>
 
             <div id="tabBarang" class="tab-content active">
-                <h3>Tambah / Update Stok Awal</h3>
+                <h3>Tambah Produk Baru</h3>
                 <form id="barangForm">
                     <div class="form-group">
                         <label>Nama Barang</label>
-                        <input type="text" id="namaBarang" required placeholder="Contoh: Indomie Goreng Spesial">
+                        <input type="text" id="namaBarang" required placeholder="Contoh: Rokok Sampoerna Mild">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Satuan Beli (Grosir)</label>
+                            <select id="satuanGrosir">
+                                <option value="Pack">Pack / Slop</option>
+                                <option value="Karton">Karton / Dus</option>
+                                <option value="Ball">Ball</option>
+                                <option value="Pcs">Pcs / Renteng</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Satuan Jual (Eceran)</label>
+                            <select id="satuanEceran">
+                                <option value="Bungkus">Bungkus</option>
+                                <option value="Pcs">Pcs</option>
+                                <option value="Botol">Botol</option>
+                                <option value="Sachet">Sachet</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Satuan Barang (Standar Ritel)</label>
-                        <select id="satuanBarang" required>
-                            <option value="Pcs">Pcs (Makanan ringan, Mi instan, Satuan umum)</option>
-                            <option value="Botol">Botol (Minuman, Kecap, Sirup)</option>
-                            <option value="Pack">Pack (Rokok, Tissue, Popok)</option>
-                            <option value="Kaleng">Kaleng (Susu, Kornet, Minuman Soda)</option>
-                            <option value="Sachet">Sachet (Kopi bubuk, Sampo renteng, Penyedap)</option>
-                            <option value="Tub">Tub (Es krim, Mentega)</option>
-                            <option value="Box">Box / Kardus (Stok grosir luar)</option>
-                        </select>
+                        <label>Isi Konversi (1 Satuan Grosir = Berapa Eceran?)</label>
+                        <input type="number" id="nilaiKonversi" min="1" value="10" required placeholder="Contoh: 1 Pack isi 10 Bungkus, isi: 10">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Jumlah Kulakan (Grosir)</label>
+                            <input type="number" id="stokGrosir" min="0" required placeholder="Misal: 2 Pack">
+                        </div>
+                        <div class="form-group">
+                            <label>Harga Beli Per 1 Satuan Grosir</label>
+                            <input type="number" id="hargaBeliGrosir" min="0" required placeholder="Rp (Modal 1 Pack)">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Stok Awal</label>
-                        <input type="number" id="stokBarang" min="0" required placeholder="0">
+                        <label>Harga Jual Eceran (Per Bungkus/Pcs)</label>
+                        <input type="number" id="hargaJualEceran" min="0" required placeholder="Rp (Harga Jual ke Konsumen)">
                     </div>
-                    <div class="form-group">
-                        <label>Harga Beli / Modal Unit</label>
-                        <input type="number" id="hargaBeliBarang" min="0" required placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Harga Jual Standar / Unit</label>
-                        <input type="number" id="hargaJualBarang" min="0" required placeholder="0">
-                    </div>
-                    <button type="submit" class="btn-primary">Simpan Barang</button>
+                    <button type="submit" class="btn-primary">Daftarkan Produk & Ambil Stok</button>
                 </form>
             </div>
 
             <div id="tabTransaksi" class="tab-content">
-                <h3>Input Transaksi Barang</h3>
+                <h3>Input Kasir / Restock</h3>
                 <form id="transaksiForm">
                     <div class="form-group">
-                        <label>Jenis Transaksi</label>
-                        <select id="jenisTransaksi" onchange="sesuaikanLabelHarga()">
-                            <option value="Keluar">Barang Terjual (Penjualan)</option>
-                            <option value="Masuk">Barang Masuk (Beli Persediaan Stok)</option>
+                        <label>Tipe Transaksi</label>
+                        <select id="jenisTransaksi" onchange="setupFormTransaksi()">
+                            <option value="Keluar">Penjualan Eceran (Konsumen Beli)</option>
+                            <option value="Masuk">Kulakan Stok Baru (Tambah Grosir)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Pilih Barang</label>
-                        <select id="pilihBarang" required onchange="autoIsiHarga()"></select>
+                        <select id="pilihBarang" required onchange="setupFormTransaksi()"></select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label id="labelQty">Jumlah Qty</label>
+                            <input type="number" id="qtyTransaksi" min="1" required placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label id="labelHarga">Harga per Unit</label>
+                            <input type="number" id="hargaTransaksi" min="0" required placeholder="0">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label id="labelHarga">Harga Jual Per Unit (Harga ke Konsumen)</label>
-                        <input type="number" id="hargaTransaksi" min="0" required placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label id="labelQty">Jumlah (Qty)</label>
-                        <input type="number" id="qtyTransaksi" min="1" required placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Tanggal Transaksi</label>
+                        <label>Tanggal</label>
                         <input type="date" id="tglTransaksi" required>
                     </div>
-                    <button type="submit" class="btn-secondary">Simpan Transaksi</button>
+                    <button type="submit" class="btn-secondary">Eksekusi Transaksi</button>
                 </form>
             </div>
         </div>
 
         <div class="card">
-            <h3>📈 Grafik Perbandingan Finansial Bulanan</h3>
-            <div style="position: relative; height:260px; width:100%">
-                <canvas id="grafikLabaRugi"></canvas>
+            <h3>📈 Grafik Kinerja Keuangan Toko</h3>
+            <div style="position: relative; height:310px; width:100%">
+                <canvas id="grafikRitel"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="grid-layout" style="grid-template-columns: 1fr 1fr;">
+    <div class="grid-layout" style="grid-template-columns: 1.2fr 1fr;">
         <div class="card">
-            <h3>📦 Sisa Persediaan Gudang</h3>
+            <h3>📦 Sisa Persediaan di Rak & Gudang (Eceran Base)</h3>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>Nama Barang</th>
-                            <th>Harga Modal</th>
+                            <th>Nama Produk</th>
+                            <th>Konversi Satuan</th>
+                            <th>HPP Satuan Riil</th>
                             <th>Harga Jual</th>
-                            <th>Sisa Stok</th>
-                            <th style="text-align: center;">Aksi</th>
+                            <th>Sisa Stok (Eceran)</th>
+                            <th style="text-align:center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tabelBarangBody"></tbody>
@@ -332,16 +219,15 @@
         </div>
 
         <div class="card">
-            <h3>📜 Jurnal & Log Aktivitas Transaksi</h3>
+            <h3>📜 Jurnal Arus Kas Transaksi</h3>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
                             <th>Tanggal</th>
                             <th>Tipe</th>
-                            <th>Barang</th>
+                            <th>Produk</th>
                             <th>Qty</th>
-                            <th>Harga Satuan</th>
                             <th>Total</th>
                         </tr>
                     </thead>
@@ -350,16 +236,16 @@
             </div>
         </div>
     </div>
-    
+
     <div style="text-align: center; margin-top: 30px;">
-        <button onclick="hapusSemuaData()" class="btn-danger" style="font-size: 12px; padding: 8px 16px;">⚠️ Reset Semua Data Toko</button>
+        <button onclick="resetToko()" class="btn-danger" style="font-size: 12px; padding: 8px 16px;">⚠️ Hapus Seluruh Database Toko</button>
     </div>
 </div>
 
 <script>
-    let dbBarang = JSON.parse(localStorage.getItem('toko_barang')) || [];
-    let dbTransaksi = JSON.parse(localStorage.getItem('toko_transaksi')) || [];
-    let myChart = null;
+    let dbBarang = JSON.parse(localStorage.getItem('ritel_barang')) || [];
+    let dbTransaksi = JSON.parse(localStorage.getItem('ritel_transaksi')) || [];
+    let chartRitel = null;
 
     document.getElementById('tglTransaksi').value = new Date().toISOString().slice(0, 10);
 
@@ -370,122 +256,109 @@
         btn.classList.add('active');
     }
 
-    function sesuaikanLabelHarga() {
+    function setupFormTransaksi() {
+        const index = document.getElementById('pilihBarang').value;
         const jenis = document.getElementById('jenisTransaksi').value;
-        const label = document.getElementById('labelHarga');
-        if (jenis === 'Masuk') {
-            label.innerText = "Harga Beli Per Unit (Harga Modal Persediaan Baru)";
-        } else {
-            label.innerText = "Harga Jual Per Unit (Harga ke Konsumen)";
-        }
-        autoIsiHarga();
-    }
-
-    function autoIsiHarga() {
-        const indexBarang = document.getElementById('pilihBarang').value;
-        const jenis = document.getElementById('jenisTransaksi').value;
-        const inputHarga = document.getElementById('hargaTransaksi');
         const labelQty = document.getElementById('labelQty');
-        
-        if (indexBarang === "") {
-            inputHarga.value = "";
-            labelQty.innerText = "Jumlah (Qty)";
-            return;
-        }
+        const labelHarga = document.getElementById('labelHarga');
+        const inputHarga = document.getElementById('hargaTransaksi');
 
-        const barang = dbBarang[indexBarang];
-        const satuan = barang.satuan || 'Pcs';
-        labelQty.innerText = `Jumlah Qty (Satuan: ${satuan})`;
+        if(index === "") return;
+        const barang = dbBarang[index];
 
-        if (jenis === 'Masuk') {
-            inputHarga.value = barang.hargaBeli || 0;
+        if(jenis === 'Masuk') {
+            labelQty.innerText = `Jumlah Masuk (${barang.satuanGrosir})`;
+            labelHarga.innerText = `Harga Modal Per ${barang.satuanGrosir}`;
+            inputHarga.value = barang.hargaBeliGrosir;
         } else {
-            inputHarga.value = barang.hargaJual || 0; 
+            labelQty.innerText = `Jumlah Jual (${barang.satuanEceran})`;
+            labelHarga.innerText = `Harga Jual Per ${barang.satuanEceran}`;
+            inputHarga.value = barang.hargaJualEceran;
         }
     }
 
-    function updateDropdownBarang() {
+    function updateDropdown() {
         const select = document.getElementById('pilihBarang');
-        select.innerHTML = '<option value="">-- Pilih Barang --</option>';
-        dbBarang.forEach((barang, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.innerText = `${barang.nama} (Stok: ${barang.stok} ${barang.satuan || 'Pcs'})`;
-            select.appendChild(option);
+        select.innerHTML = '<option value="">-- Pilih Produk Ritel --</option>';
+        dbBarang.forEach((b, i) => {
+            select.innerHTML += `<option value="${i}">${b.nama} (Tersedia: ${b.stokEceran} ${b.satuanEceran})</option>`;
         });
     }
 
     function renderAplikasi() {
-        localStorage.setItem('toko_barang', JSON.stringify(dbBarang));
-        localStorage.setItem('toko_transaksi', JSON.stringify(dbTransaksi));
+        localStorage.setItem('ritel_barang', JSON.stringify(dbBarang));
+        localStorage.setItem('ritel_transaksi', JSON.stringify(dbTransaksi));
+        updateDropdown();
 
-        updateDropdownBarang();
-
-        const tBodyBarang = document.getElementById('tabelBarangBody');
-        tBodyBarang.innerHTML = '';
-        dbBarang.forEach((barang, index) => {
-            const hgBeli = barang.hargaBeli || 0;
-            const hgJual = barang.hargaJual || 0;
-            const satuan = barang.satuan || 'Pcs';
-            tBodyBarang.innerHTML += `
+        // Render Tabel Persediaan
+        const tBarang = document.getElementById('tabelBarangBody');
+        tBarang.innerHTML = '';
+        dbBarang.forEach((b, i) => {
+            tBarang.innerHTML += `
                 <tr>
-                    <td><b>${barang.nama}</b><br><small style="color:var(--text-muted)">Satuan: ${satuan}</small></td>
-                    <td>Rp ${hgBeli.toLocaleString('id-ID')}</td>
-                    <td>Rp ${hgJual.toLocaleString('id-ID')}</td>
-                    <td><span style="font-weight:600; color:${barang.stok <= 3 ? 'var(--danger)' : 'inherit'}">${barang.stok} ${satuan}</span></td>
-                    <td style="text-align:center;"><button onclick="hapusBarang(${index})" class="btn-danger" style="padding:4px 8px; font-size:11px; border-radius:4px;">Hapus</button></td>
+                    <td><b>${b.nama}</b></td>
+                    <td><span class="badge">1 ${b.satuanGrosir} = ${b.konversi} ${b.satuanEceran}</span></td>
+                    <td>Rp ${b.hppEceran.toLocaleString('id-ID')}</td>
+                    <td>Rp ${b.hargaJualEceran.toLocaleString('id-ID')}</td>
+                    <td><span style="font-weight:bold; color:${b.stokEceran <= 5 ? 'var(--danger)':'var(--success)'}">${b.stokEceran} ${b.satuanEceran}</span></td>
+                    <td style="text-align:center;"><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="hapusBarang(${i})">Hapus</button></td>
                 </tr>
             `;
         });
 
-        const tBodyTransaksi = document.getElementById('tabelTransaksiBody');
-        tBodyTransaksi.innerHTML = '';
-        
-        const transaksiUrut = [...dbTransaksi].sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
-        
-        transaksiUrut.forEach(tx => {
-            const total = tx.qty * tx.harga;
-            const warnaTipe = tx.tipe === 'Masuk' ? 'color:#3b82f6; font-weight:bold;' : 'color:#f97316; font-weight:bold;';
-            tBodyTransaksi.innerHTML += `
+        // Render Tabel Log Transaksi
+        const tTransaksi = document.getElementById('tabelTransaksiBody');
+        tTransaksi.innerHTML = '';
+        const sortedTx = [...dbTransaksi].sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
+        sortedTx.forEach(tx => {
+            const total = tx.qty * tx.hargaRealized;
+            const badgeTipe = tx.tipe === 'Masuk' ? `<span style="color:var(--secondary)">KULAKAN</span>` : `<span style="color:var(--success)">PENJUALAN</span>`;
+            tTransaksi.innerHTML += `
                 <tr>
                     <td>${tx.tanggal}</td>
-                    <td style="${warnaTipe}">${tx.tipe}</td>
+                    <td>${badgeTipe}</td>
                     <td><b>${tx.namaBarang}</b></td>
-                    <td>${tx.qty} ${tx.satuan || 'Pcs'}</td>
-                    <td>Rp ${parseInt(tx.harga).toLocaleString('id-ID')}</td>
+                    <td>${tx.qty} ${tx.satuanDipakai}</td>
                     <td><b>Rp ${total.toLocaleString('id-ID')}</b></td>
                 </tr>
             `;
         });
 
-        prosesLabaRugiDanGrafik();
+        hitungKeuanganDanGrafik();
     }
 
-    document.getElementById('barangForm').addEventListener('submit', function(e) {
+    document.getElementById('barangForm').addEventListener('submit', function(e){
         e.preventDefault();
         const nama = document.getElementById('namaBarang').value.trim();
-        const satuan = document.getElementById('satuanBarang').value;
-        const stok = parseInt(document.getElementById('stokBarang').value);
-        const hargaBeli = parseInt(document.getElementById('hargaBeliBarang').value) || 0;
-        const hargaJual = parseInt(document.getElementById('hargaJualBarang').value) || 0;
+        const satuanGrosir = document.getElementById('satuanGrosir').value;
+        const satuanEceran = document.getElementById('satuanEceran').value;
+        const konversi = parseInt(document.getElementById('nilaiKonversi').value);
+        const qtyGrosir = parseInt(document.getElementById('stokGrosir').value);
+        const hargaBeliGrosir = parseInt(document.getElementById('hargaBeliGrosir').value);
+        const hargaJualEceran = parseInt(document.getElementById('hargaJualEceran').value);
 
-        const adaBarang = dbBarang.find(b => b.nama.toLowerCase() === nama.toLowerCase());
-        if (adaBarang) {
-            alert("Barang sudah ada di daftar persediaan! Sila pakai menu transaksi untuk menambah stok.");
-            return;
+        if(dbBarang.find(b => b.nama.toLowerCase() === nama.toLowerCase())) {
+            return alert("Produk sudah terdaftar! Gunakan menu kasir untuk restock.");
         }
 
-        dbBarang.push({ nama, satuan, stok, hargaBeli, hargaJual });
+        const totalStokEceran = qtyGrosir * konversi;
+        const hppEceran = hargaBeliGrosir / konversi;
 
-        if (stok > 0) {
+        dbBarang.push({
+            nama, satuanGrosir, satuanEceran, konversi,
+            stokEceran: totalStokEceran,
+            hargaBeliGrosir, hargaJualEceran, hppEceran
+        });
+
+        if(qtyGrosir > 0) {
             dbTransaksi.push({
                 tanggal: new Date().toISOString().slice(0, 10),
                 tipe: 'Masuk',
                 namaBarang: nama,
-                satuan: satuan,
-                qty: stok,
-                harga: hargaBeli,
-                hargaBeliAsli: hargaBeli
+                qty: qtyGrosir,
+                satuanDipakai: satuanGrosir,
+                hargaRealized: hargaBeliGrosir,
+                hppAsliEceran: hppEceran
             });
         }
 
@@ -493,155 +366,111 @@
         renderAplikasi();
     });
 
-    document.getElementById('transaksiForm').addEventListener('submit', function(e) {
+    document.getElementById('transaksiForm').addEventListener('submit', function(e){
         e.preventDefault();
-        const jenis = document.getElementById('jenisTransaksi').value;
-        const indexBarang = document.getElementById('pilihBarang').value;
-        const harga = parseInt(document.getElementById('hargaTransaksi').value);
+        const index = document.getElementById('pilihBarang').value;
+        const tipe = document.getElementById('jenisTransaksi').value;
         const qty = parseInt(document.getElementById('qtyTransaksi').value);
+        const harga = parseInt(document.getElementById('hargaTransaksi').value);
         const tanggal = document.getElementById('tglTransaksi').value;
 
-        if(indexBarang === "") return alert("Pilih barang terlebih dahulu!");
+        if(index === "") return alert("Pilih barang!");
+        const barang = dbBarang[index];
 
-        const barang = dbBarang[indexBarang];
+        if(tipe === 'Masuk') {
+            const penambahanEceran = qty * barang.konversi;
+            barang.stokEceran += penambahanEceran;
+            barang.hargaBeliGrosir = harga;
+            barang.hppEceran = harga / barang.konversi; // Update HPP Baru
 
-        if (jenis === 'Keluar' && barang.stok < qty) {
-            alert(`Stok tidak mencukupi! Sisa stok ${barang.nama} saat ini adalah ${barang.stok} ${barang.satuan || 'Pcs'}.`);
-            return;
-        }
-
-        if (jenis === 'Masuk') {
-            barang.stok += qty;
-            barang.hargaBeli = harga; 
+            dbTransaksi.push({
+                tanggal, tipe, namaBarang: barang.nama,
+                qty: qty, satuanDipakai: barang.satuanGrosir,
+                hargaRealized: harga, hppAsliEceran: barang.hppEceran
+            });
         } else {
-            barang.stok -= qty;
-        }
+            if(barang.stokEceran < qty) {
+                return alert(`Stok tidak cukup! Sisa stok di rak hanya ${barang.stokEceran} ${barang.satuanEceran}`);
+            }
+            barang.stokEceran -= qty;
 
-        dbTransaksi.push({
-            tanggal: tanggal,
-            tipe: jenis,
-            namaBarang: barang.nama,
-            satuan: barang.satuan || 'Pcs',
-            qty: qty,
-            harga: harga,
-            hargaBeliAsli: barang.hargaBeli
-        });
+            dbTransaksi.push({
+                tanggal, tipe, namaBarang: barang.nama,
+                qty: qty, satuanDipakai: barang.satuanEceran,
+                hargaRealized: harga, hppAsliEceran: barang.hppEceran
+            });
+        }
 
         document.getElementById('qtyTransaksi').value = '';
-        document.getElementById('hargaTransaksi').value = '';
         renderAplikasi();
     });
 
     function hapusBarang(index) {
-        if(confirm("Hapus barang dari daftar persediaan? (Data log laporan keuangan lama tetap dipertahankan)")) {
-            dbBarang.splice(index, 1);
-            renderAplikasi();
-        }
+        if(confirm("Hapus master produk ini?")) { dbBarang.splice(index,1); renderAplikasi(); }
     }
 
-    function hapusSemuaData() {
-        if(confirm("Apakah Anda yakin ingin mengosongkan semua data barang, transaksi, dan grafik toko ini?")) {
-            dbBarang = [];
-            dbTransaksi = [];
-            renderAplikasi();
-        }
+    function resetToko() {
+        if(confirm("Reset seluruh database sistem?")) { dbBarang = []; dbTransaksi = []; renderAplikasi(); }
     }
 
-    function prosesLabaRugiDanGrafik() {
-        const blnIni = new Date().toISOString().slice(0, 7); 
-        
-        let totalBeliBlnIni = 0;
-        let totalJualBlnIni = 0;
-        let totalHppBlnIni = 0;
-        let bulananData = {};
+    function hitungKeuanganDanGrafik() {
+        const blnIni = new Date().toISOString().slice(0, 7);
+        let beliBlnIni = 0, omsetBlnIni = 0, labaBersihBlnIni = 0;
+        let laporanBulanan = {};
 
         dbTransaksi.forEach(tx => {
-            const total = tx.qty * tx.harga;
-            const bulanTx = tx.tanggal.slice(0, 7);
+            const blnTx = tx.tanggal.slice(0, 7);
+            const nominal = tx.qty * tx.hargaRealized;
 
-            if (bulanTx === blnIni) {
-                if (tx.tipe === 'Masuk') {
-                    totalBeliBlnIni += total;
-                }
-                if (tx.tipe === 'Keluar') {
-                    totalJualBlnIni += total;
-                    totalHppBlnIni += (tx.qty * (tx.hargaBeliAsli || 0));
-                }
-            }
+            if(!laporanBulanan[blnTx]) laporanBulanan[blnTx] = { kulakan: 0, omset: 0, laba: 0 };
 
-            if (!bulananData[bulanTx]) {
-                bulananData[bulanTx] = { masuk: 0, keluar: 0, hpp: 0 };
-            }
-            if (tx.tipe === 'Masuk') bulananData[bulanTx].masuk += total;
-            if (tx.tipe === 'Keluar') {
-                bulananData[bulanTx].keluar += total;
-                bulananData[bulanTx].hpp += (tx.qty * (tx.hargaBeliAsli || 0));
+            if(tx.tipe === 'Masuk') {
+                laporanBulanan[blnTx].kulakan += nominal;
+                if(blnTx === blnIni) beliBlnIni += nominal;
+            } else {
+                laporanBulanan[blnTx].omset += nominal;
+                const totalHpp = tx.qty * (tx.hppAsliEceran || 0);
+                const untungBersih = nominal - totalHpp;
+                laporanBulanan[blnTx].laba += untungBersih;
+
+                if(blnTx === blnIni) {
+                    omsetBlnIni += nominal;
+                    labaBersihBlnIni += untungBersih;
+                }
             }
         });
 
-        document.getElementById('statBeli').innerText = `Rp ${totalBeliBlnIni.toLocaleString('id-ID')}`;
-        document.getElementById('statJual').innerText = `Rp ${totalJualBlnIni.toLocaleString('id-ID')}`;
+        document.getElementById('statBeli').innerText = `Rp ${beliBlnIni.toLocaleString('id-ID')}`;
+        document.getElementById('statJual').innerText = `Rp ${omsetBlnIni.toLocaleString('id-ID')}`;
         
-        const keuntunganBersihBlnIni = totalJualBlnIni - totalHppBlnIni;
-        const statLabaRugi = document.getElementById('statLabaRugi');
-        const boxLabaRugi = document.getElementById('boxLabaRugi');
-
-        if(keuntunganBersihBlnIni >= 0) {
-            statLabaRugi.innerText = `Untung Bersih: Rp ${keuntunganBersihBlnIni.toLocaleString('id-ID')}`;
-            boxLabaRugi.className = "stat-box bg-laba";
+        const boxLaba = document.getElementById('boxLabaRugi');
+        if(labaBersihBlnIni >= 0) {
+            document.getElementById('statLabaRugi').innerText = `Untung Rp ${labaBersihBlnIni.toLocaleString('id-ID')}`;
+            boxLaba.className = "stat-box bg-laba";
         } else {
-            statLabaRugi.innerText = `Rugi Bersih: Rp ${Math.abs(keuntunganBersihBlnIni).toLocaleString('id-ID')}`;
-            boxLabaRugi.className = "stat-box bg-danger";
+            document.getElementById('statLabaRugi').innerText = `Rugi Rp ${Math.abs(labaBersihBlnIni).toLocaleString('id-ID')}`;
+            boxLaba.className = "stat-box bg-danger";
         }
 
-        const sortedLabels = Object.keys(bulananData).sort().slice(-6);
-        const dataSetMasuk = sortedLabels.map(bln => bulananData[bln].masuk);
-        const dataSetKeluar = sortedLabels.map(bln => bulananData[bln].keluar);
-        const dataSetLabaRugi = sortedLabels.map(bln => bulananData[bln].keluar - bulananData[bln].hpp);
+        // Grafik Logic
+        const labels = Object.keys(laporanBulanan).sort().slice(-6);
+        const dataKulakan = labels.map(l => laporanBulanan[l].kulakan);
+        const dataOmset = labels.map(l => laporanBulanan[l].omset);
+        const dataLaba = labels.map(l => laporanBulanan[l].laba);
 
-        if (myChart) { myChart.destroy(); }
-
-        const ctx = document.getElementById('grafikLabaRugi').getContext('2d');
-        myChart = new Chart(ctx, {
+        if(chartRitel) chartRitel.destroy();
+        const ctx = document.getElementById('grafikRitel').getContext('2d');
+        chartRitel = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: sortedLabels,
+                labels: labels,
                 datasets: [
-                    {
-                        label: 'Pembelian Stok (Modal)',
-                        data: dataSetMasuk,
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Penjualan (Omset)',
-                        data: dataSetKeluar,
-                        backgroundColor: '#f97316',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Laba Bersih Riil',
-                        data: dataSetLabaRugi,
-                        type: 'line',
-                        borderColor: '#10b981',
-                        backgroundColor: '#10b981',
-                        borderWidth: 3,
-                        fill: false,
-                        tension: 0.1
-                    }
+                    { label: 'Belanja Modal Stok', data: dataKulakan, backgroundColor: '#475569' },
+                    { label: 'Omset Penjualan', data: dataOmset, backgroundColor: '#3b82f6' },
+                    { label: 'Laba Bersih Toko', data: dataLaba, type: 'line', borderColor: '#10b981', fill: false, tension: 0.2 }
                 ]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { font: { family: 'Inter' } } }
-                },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                    x: { grid: { display: false } }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false }
         });
     }
 
